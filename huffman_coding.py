@@ -24,7 +24,7 @@ def create_frequencies(text):
         frequncies[ord(i)] += 1
     return frequncies
 
-def create_character_objects(freq):
+def create_character_objects_array(freq):
     charObjArr = []
     for ucode, freq in enumerate(freq):
         if(freq != 0):
@@ -58,13 +58,33 @@ def merge_nodes(minHeap):
         newNode = Node(ucode=None, freq=newFreq, left=left, right=right)
         heapq.heappush(minHeap, newNode)
 
+def generate_code(key, tree, result):
+    if tree == None:
+        return
+    if tree.ucode == key:
+        return
+    result.append("0")
+    generate_code(key, tree.left, result)
+    result.append("1")
+    generate_code(key, tree.right, result)
+    result.pop()
+
+def create_dict_of_codes(newCharObjArr, tree):
+    code_dict = {}
+    for node in charObjArr:
+        code_dict[chr(node.ucode)] = generate_code(node.ucode, tree, result=[])
+    return code_dict
+
 if __name__ == "__main__":
     fileContent = read_file("./file.txt")
     print(fileContent)
-    freqArr = create_frequencies(fileContent)
-    charObjArr = create_character_objects(freqArr)
-    print_character_array(charObjArr)
-    minHeap = create_heap(charObjArr)
+    freqArr = create_frequencies(fileContent)       #creating the frequency array of type [1, 2, 5, 0, 10, 18.......] 256 indexes 0-255
+    charObjArr = create_character_objects_array(freqArr)   # creates the array of nodes [node1, node2, node3....] All nodes with freq>0
+    # print_character_array(charObjArr)
+    minHeap = create_heap(charObjArr)           # Heapifys the node array to create a min Heap
     # print_min_heap(minHeap)
-    merge_nodes(minHeap)
+    merge_nodes(minHeap)        # Merges all the nodes in the min heap so that only one node is remaining which is a tree consisting of all other nodes
     print(minHeap)
+    newCharObjArr = create_character_objects_array(freqArr)     # creates a new character array to lookup in the tree generated
+    print_character_array(newCharObjArr)
+    code_dict = create_dict_of_codes(newCharObjArr, minHeap[0])        # generates code corresponding to each unique chracter

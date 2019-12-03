@@ -58,22 +58,25 @@ def merge_nodes(minHeap):
         newNode = Node(ucode=None, freq=newFreq, left=left, right=right)
         heapq.heappush(minHeap, newNode)
 
-def generate_code(key, tree, result):
+def generate_code(code_dict, tree, result):
     if tree == None:
         return
-    if tree.ucode == key:
-        return
-    result.append("0")
-    generate_code(key, tree.left, result)
-    result.append("1")
-    generate_code(key, tree.right, result)
-    result.pop()
+    if tree.left==None and tree.right==None:
+        code_dict[chr(tree.ucode)] = result
+    generate_code(code_dict, tree.left, result+"0")
+    generate_code(code_dict, tree.right, result+"1")
 
-def create_dict_of_codes(newCharObjArr, tree):
+def create_dict_of_codes(tree):
     code_dict = {}
-    for node in charObjArr:
-        code_dict[chr(node.ucode)] = generate_code(node.ucode, tree, result=[])
+    result = ""
+    generate_code(code_dict, tree, result)
     return code_dict
+
+def generate_encoded_text(code_dict, text):
+    encodedtext = ""
+    for char in text:
+        encodedtext += code_dict[char]
+    return encodedtext
 
 if __name__ == "__main__":
     fileContent = read_file("./file.txt")
@@ -87,4 +90,7 @@ if __name__ == "__main__":
     print(minHeap)
     newCharObjArr = create_character_objects_array(freqArr)     # creates a new character array to lookup in the tree generated
     print_character_array(newCharObjArr)
-    code_dict = create_dict_of_codes(newCharObjArr, minHeap[0])        # generates code corresponding to each unique chracter
+    code_dict = create_dict_of_codes(minHeap[0])        # generates code corresponding to each unique chracter
+    print("Code Dict: ", code_dict)
+    encodedText = generate_encoded_text(code_dict, fileContent)     # Encodes the content of the file by mapping each character with its generated code
+    print(encodedText)
